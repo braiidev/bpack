@@ -17,7 +17,7 @@ M.started = false
 --- Orden de arranque. Cada entrada es un módulo de `lua/` con un `setup()`.
 --- El orden importa: core define opciones y autocmds, y el resto lo consume.
 --- @type string[]
-local modules = {}
+local modules = { "core" }
 
 --- Carga los módulos en orden. Cada uno dentro de `util.protect`, así que un
 --- error en uno no impide que carguen los siguientes.
