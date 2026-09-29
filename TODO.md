@@ -18,10 +18,10 @@ fase en curso, este archivo es el indice de trabajo.
 - [x] `theme.lua` + port de `flatline` + persistencia en `state.json` - v0.6
 - [x] `spec.lua` + wrapper de `vim.pack` + `:Bpack sync/add/del/update/list/log` - v0.7
 - [x] `doctor.lua` + `:Bpack doctor` - v0.8
+- [x] `scripts/bpack` + `:Bpack selfupdate` con rollback - v0.9
 
 ## Next — Fase 0: cimientos de `bpack`
 
-- [ ] `scripts/bpack` + `:Bpack selfupdate` con rollback - v0.9
 - [ ] `install.sh` idempotente - v0.10
 - [ ] `tests/` de la config + gate de arranque limpio - v0.11
 

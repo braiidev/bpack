@@ -26,6 +26,9 @@ local M = {}
 --- @field level bpack.Level
 --- @field label string qué se comprobó
 --- @field detail string|nil el valor encontrado, o por qué falla
+--- @field counts? boolean si este check cuenta para el resumen. Por defecto sí.
+---   Las líneas de detalle de un hallazgo se ponen en `false`: sin eso, un
+---   módulo roto contaba dos errores y el número del resumen mentía.
 
 --- El orden de un `require` no es una preferencia: `bpack.engine` llama a
 --- `bpack.cmd` y `vim.pack`, así que tiene que estar cargado cuando esto corre.
@@ -315,6 +318,36 @@ local function check_plugins()
   return out
 end
 
+--- Errores de ESTE arranque.
+---
+--- `util.protect` los acumula en vez de propagarlos, para que un módulo roto no
+--- baje Neovim. El precio de eso es que un fallo se ve en un `vim.notify` que
+--- ya pasó: sin esto, `:Bpack doctor` puede dar todo verde mientras la config
+--- está a medias.
+--- @return bpack.Check[]
+local function check_startup_errors()
+  if #util.errors == 0 then
+    return { { level = "ok", label = "arranque", detail = "sin errores en este arranque" } }
+  end
+
+  -- Un módulo roto es UN error. La cabecera cuenta; las líneas por módulo son
+  -- su detalle y no vuelven a sumar, o el resumen dice 2 errores por un problema.
+  local out = { {
+    level = "error",
+    label = "arranque",
+    detail = ("%d módulo(s) fallaron al cargar:"):format(#util.errors),
+  } }
+  for _, e in ipairs(util.errors) do
+    out[#out + 1] = {
+      level = "error",
+      counts = false,
+      label = "  " .. e.module,
+      detail = (e.err:gsub("\n", " ")),
+    }
+  end
+  return out
+end
+
 --- ── Atajos ─────────────────────────────────────────────────────────────────
 
 --- @return bpack.Check[]
@@ -330,7 +363,6 @@ local function check_keys()
   end
 
   local out = { { level = "ok", label = "atajos", detail = ("%d declarados"):format(#declared) } }
-
   local mapped, missing, blank = 0, {}, {}
   for _, k in ipairs(declared) do
     local found = false
@@ -387,6 +419,7 @@ function M.run()
     end)() },
     { section = "plugins", checks = check_plugins() },
     { section = "atajos", checks = check_keys() },
+    { section = "arranque", checks = check_startup_errors() },
   }
 end
 
@@ -398,9 +431,10 @@ local MARKS = {
   error = "✗",
 }
 
---- Dibuja los checks en un scratch. Devuelve el número de `error`.
---- @return integer errors, integer warnings
-function M.report()
+--- El reporte como líneas, más el conteo. Ni dibuja ni escribe: lo consumen
+--- `report()` y `print()`.
+--- @return string[] lines, integer errors, integer warnings
+function M.lines()
   local lines, errors, warnings = {}, 0, 0
 
   for _, group in ipairs(M.run()) do
@@ -416,10 +450,12 @@ function M.report()
       lines[#lines + 1] = group.section
       lines[#lines + 1] = string.rep("─", #group.section)
       for _, c in ipairs(group.checks) do
-        if c.level == "error" then
-          errors = errors + 1
-        elseif c.level == "warn" then
-          warnings = warnings + 1
+        if c.counts ~= false then
+          if c.level == "error" then
+            errors = errors + 1
+          elseif c.level == "warn" then
+            warnings = warnings + 1
+          end
         end
         lines[#lines + 1] = ("  %s %-" .. width .. "s  %s"):format(MARKS[c.level] or "?", c.label, c.detail or "")
       end
@@ -434,7 +470,26 @@ function M.report()
   end
   lines[#lines + 1] = "Sólo lee. Para reparar: :Bpack sync, :Bpack del, :Bpack add."
 
+  return lines, errors, warnings
+end
+
+--- Dibuja el reporte en un scratch. Devuelve el número de `error`.
+--- @return integer errors, integer warnings
+function M.report()
+  local lines, errors, warnings = M.lines()
   cmd.scratch("bpack doctor", lines, "bpack-doctor")
+  return errors, warnings
+end
+
+--- El mismo reporte a stdout, para `scripts/bpack --doctor`.
+---
+--- Headless no tiene ventana donde dibujar, así que el CLI necesita una salida
+--- que pueda leer un humano o un script. Sale por stdout y no por `print`, que
+--- en `--headless` se pierde entre el resto del ruido.
+--- @return integer errors, integer warnings
+function M.print()
+  local lines, errors, warnings = M.lines()
+  io.stdout:write(table.concat(lines, "\n"), "\n")
   return errors, warnings
 end
 

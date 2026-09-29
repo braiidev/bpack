@@ -29,15 +29,32 @@ Todo pasa por un comando con subcomando:
 :Bpack theme list      # temas disponibles
 :Bpack doctor          # diagnostico
 :Bpack selfupdate      # git pull del repo-config + resync
-:Bpack reload          # recarga lo nuestro sin re-sourcer init.lua
+:Bpack selfupdate!     # idem, sin probar la config nueva en un proceso hijo
 ```
+
+La lista de arriba es la real. Las dos siguientes **no existen todavia** y estan
+aca para no olvidarlas; si las implementas, sacales la marca:
+
+```
+:Bpack search query    # busca en GitHub          (no implementado)
+:Bpack reload          # recarga lo nuestro       (no implementado)
+```
+
+`selfupdate` exige el árbol limpio (si no, aborta: el rollback descarta lo que no
+esté commiteado), y después de traer la config nueva la **arranca en un proceso
+hijo** para ver si funciona. Si no, vuelve al commit anterior con
+`git reset --hard`. La salud se juzga por el log, no por el exit code: nuestra
+config se protege con `util.protect`, así que un módulo roto deja el arranque en
+exit 0. Cuando el hijo no dice nada útil no se revierte a ciegas: avisa y deja el
+comando de vuelta atrás a mano.
 
 Linea de comandos, para el instalador y para la shell:
 
 ```bash
-scripts/bpack --setup      # instalacion de cero
+scripts/bpack --setup      # instalacion de cero (delega en install.sh)
 scripts/bpack --sync
-scripts/bpack --doctor
+scripts/bpack --doctor     # sale por stdout; exit 1 si hay errores
+scripts/bpack --selfupdate
 scripts/bpack --version
 ```
 

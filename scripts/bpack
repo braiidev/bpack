@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# bpack — la config de Neovim por línea de comandos.
+#
+# No reimplementa nada: todo lo importante vive en Lua dentro de la config, y
+# esto es un wrapper que corre Neovim con `-u` apuntando al repo. Si algo se
+# puede hacer acá, se puede hacer con `:Bpack` adentro, y al revés.
+#
+# Existe igual porque hay cosas que no sirven dentro de un editor abierto: un
+# `doctor` para leer en una terminal, un `sync` para correr en un script de
+# arranque, y sobre todo `--setup`, que se corre antes de que exista config.
+
+set -euo pipefail
+
+# La raíz es el repo que contiene este script. Nada de hardcodear rutas: el
+# mismo script sirve en `~/Dev/_nvim` durante el desarrollo y en
+# `~/.config/nvim` una vez instalado.
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+die() { printf 'bpack: %s\n' "$1" >&2; exit "${2:-1}"; }
+
+need_nvim() {
+  command -v nvim >/dev/null 2>&1 || die "no encuentro nvim en el PATH"
+}
+
+# Corre un comando de bpack dentro de Neovim y propaga el código de salida.
+# El `defer_fn` en vez de `q`: `-c 'q'` mata a Neovim antes de `VimEnter`, así
+# que nunca se ejercita la carga diferida. Ver la nota del gate en PLAN.md.
+bpack_nvim() {
+  need_nvim
+  nvim --headless -u "$root/init.lua" \
+    -c "lua vim.defer_fn(function() vim.cmd('qa!') end, 60)" \
+    "$@"
+}
+
+usage() {
+  cat <<'USAGE'
+bpack — la config de Neovim por línea de comandos
+
+  --setup      instalación de cero (delega en install.sh)
+  --sync       :Bpack sync — spec <-> disco <-> lock
+  --doctor     :Bpack doctor, por stdout
+  --selfupdate :Bpack selfupdate, con rollback
+  --version    versión de la config
+  --help       esto
+
+Todo lo demás se hace adentro del editor con :Bpack.
+USAGE
+}
+
+case "${1:-}" in
+  --version)
+    # El tag es la versión: es lo único que ya existe y no hay que mantener en
+    # paralelo. Sin repo (o sin tags) se degrada en vez de fallar.
+    if [ -d "$root/.git" ]; then
+      v="$(git -C "$root" describe --tags --abbrev=0 2>/dev/null || true)"
+      [ -n "${v:-}" ] || v="$(git -C "$root" rev-parse --short HEAD 2>/dev/null || echo desconocido)"
+    else
+      v="desconocido"
+    fi
+    printf 'bpack %s\n' "$v"
+    ;;
+
+  --doctor)
+    need_nvim
+    # El doctor devuelve 1 si hay errores, para que un script pueda decidir.
+    # `M.print()` escribe a stdout a propósito: en --headless un `print` se
+    # pierde entre el ruido.
+    if ! nvim --headless -u "$root/init.lua" \
+      -c "lua local e,w = require('bpack.doctor').print(); vim.g.bpack_doctor = e" \
+      -c "lua vim.defer_fn(function() vim.cmd('cquit ' .. (vim.g.bpack_doctor or 0)) end, 60)"; then
+      exit 1
+    fi
+    ;;
+
+  --sync)
+    bpack_nvim -c 'Bpack sync'
+    ;;
+
+  --selfupdate)
+    bpack_nvim -c 'Bpack selfupdate'
+    ;;
+
+  --setup)
+    # La instalación de cero es `install.sh`, que es v0.10. Delegar acá en vez
+    # de inventar una segunda forma de hacer lo mismo.
+    if [ -x "$root/install.sh" ]; then
+      exec "$root/install.sh" "$@"
+    fi
+    die "todavía no hay install.sh en $root (llega en v0.10); por ahora: bpack --doctor"
+    ;;
+
+  --help | -h | "")
+    usage
+    ;;
+
+  *)
+    die "opción desconocida: $1 (probá --help)"
+    ;;
+esac

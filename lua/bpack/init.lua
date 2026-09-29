@@ -24,11 +24,20 @@ M.started = false
 --- subcomandos y el scratch que usan los demás; `bpack.engine` segundo, que
 --- registra plugins y emite `User VeryLazy` en `VimEnter`; `bpack.doctor` tercero,
 --- porque sólo lee el estado de los anteriores y tiene que poder mencionarlos
---- aunque alguno haya fallado al cargar; `bpack.theme` cuarto para que el
---- highlighting esté listo antes de que monte cualquier UI; y `bpack.keymap` al
---- final, cuando ya no queda nada que registrar.
+--- aunque alguno haya fallado al cargar; `bpack.selfupdate` cuarto, que además de
+--- registrar su comando necesita el engine para resincronizar; `bpack.theme`
+--- quinto para que el highlighting esté listo antes de que monte cualquier UI; y
+--- `bpack.keymap` al final, cuando ya no queda nada que registrar.
 --- @type string[]
-local modules = { "core", "bpack.cmd", "bpack.engine", "bpack.doctor", "bpack.theme", "bpack.keymap" }
+local modules = {
+  "core",
+  "bpack.cmd",
+  "bpack.engine",
+  "bpack.doctor",
+  "bpack.selfupdate",
+  "bpack.theme",
+  "bpack.keymap",
+}
 
 --- Carga los módulos en orden. Cada uno dentro de `util.protect`, así que un
 --- error en uno no impide que carguen los siguientes.
