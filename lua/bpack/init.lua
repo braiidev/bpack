@@ -14,10 +14,16 @@ local M = {}
 
 M.started = false
 
---- Orden de arranque. Cada entrada es un módulo de `lua/` con un `setup()`.
---- El orden importa: core define opciones y autocmds, y el resto lo consume.
+--- Orden de arranque. Cada entrada es un nombre de `require` con un `setup()`.
+---
+--- Lleva la ruta completa y no una abreviatura, porque el gestor vive bajo
+--- `lua/bpack/` y las features bajo `lua/`, y adivinar cuál es cuál fue
+--- justamente lo que hizo confuso al manager anterior.
+---
+--- El orden importa: `bpack.keymap` fija el leader antes de registrar ningún
+--- atajo, y `bpack.cmd` publica los comandos una vez que todo lo demás cargó.
 --- @type string[]
-local modules = { "core" }
+local modules = { "core", "bpack.keymap", "bpack.cmd" }
 
 --- Carga los módulos en orden. Cada uno dentro de `util.protect`, así que un
 --- error en uno no impide que carguen los siguientes.
@@ -51,7 +57,7 @@ end
 
 --- Registra un módulo en el orden de arranque. Lo usan los `init.lua` de cada
 --- feature para no tener que editar esta lista.
---- @param name string
+--- @param name string nombre de `require`, por ejemplo "lua/lang" → "lang"
 function M.register(name)
   modules[#modules + 1] = name
 end
