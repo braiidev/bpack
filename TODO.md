@@ -12,12 +12,15 @@ fase en curso, este archivo es el indice de trabajo.
 
 - [x] Bootstrap del repo: `git init`, `.gitignore` minimo, commit inicial - v0.1
 - [x] Esqueleto del proyecto: `AGENTS.md`, `TODO.md` y `PLAN.md` de la fase 0 - v0.2
+- [x] `init.lua` + `bpack/init.lua`: guarda de 0.12, `pcall` sobre todo - v0.3
+- [x] `core/`: options y autocmds base, sin plugins - v0.4
+- [x] `keys.lua` + `keymap.lua` + `:Bpack keys` autogenerado - v0.5
 
 ## Next — Fase 0: cimientos de `bpack`
 
-- [ ] `init.lua` + `bpack/init.lua`: guarda de 0.12, `pcall` sobre todo - v0.3
-- [ ] `core/`: options y autocmds base, sin plugins - v0.4
-- [ ] `keys.lua` + `keymap.lua` + `:Bpack keys` autogenerado - v0.5
+- [x] `init.lua` + `bpack/init.lua`: guarda de 0.12, `pcall` sobre todo - v0.3
+- [x] `core/`: options y autocmds base, sin plugins - v0.4
+- [x] `keys.lua` + `keymap.lua` + `:Bpack keys` autogenerado - v0.5
 - [ ] `theme.lua` + port de `flatline` + persistencia en `state.json` - v0.6
 - [ ] `spec.lua` + wrapper de `vim.pack` + `:Bpack sync/add/del/update/list/log` - v0.7
 - [ ] `doctor.lua` + `:Bpack doctor` - v0.8
