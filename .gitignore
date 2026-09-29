@@ -1,0 +1,19 @@
+# Plan de trabajo: es scratch por task. El registro real esta en git log.
+PLAN.md
+
+# Secretos y entorno
+.env
+.env.*
+
+# Artefactos de build
+node_modules/
+dist/
+build/
+
+# Cache de Lua
+__pycache__/
+*.luac
+
+# Generado por Neovim
+*.log
+log/
