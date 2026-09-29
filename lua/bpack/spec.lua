@@ -36,4 +36,47 @@ return {
   --- Ejemplo: `["lazy.nvim"] = "VeryLazy"` carga en el primer `User VeryLazy`.
   ---@type table<string, string>
   lazy = {},
+
+  -- ── Herramientas, no plugins ─────────────────────────────────────────────
+  -- Los binarios que necesitan los servidores de lenguaje y los formateadores.
+  -- Vive en el mismo archivo que `plugins` a propósito: es un solo lugar donde
+  -- ver qué administra bpack, aunque el mecanismo sea otro (npm o un release).
+  --
+  -- Por qué no usamos lo que hay en `/usr/bin` o en el npm global: la matriz de
+  -- `lua/lang/` tiene que apuntar a una ruta que nosotros controlamos, o el
+  -- comportamiento de Neovim depende de lo que el sistema tenga instalado.
+  -- Se instalan en `~/.local/opt/bpack-tools/` y se reachan por un shim en
+  -- `~/.local/bin`, que ya está en el PATH.
+  --
+  -- `kind` decide el mecanismo:
+  --   `npm`     → `npm install --prefix`, sin `-g`. No toca el sistema.
+  --   `release` → un artefacto de un release de GitHub para esta plataforma.
+  --
+  -- `version` va pineado por la misma razón que los plugins: para que dos
+  -- máquinas con la misma config se comporten igual.
+  --
+  -- La clave es el nombre del ejecutable, no del paquete: `ruff`, no
+  -- `astral-sh/ruff`. Es lo que `lua/lang/` busca.
+  ---@type table<string, table>
+  tools = {
+    ruff = {
+      kind = "release",
+      version = "0.14.6",
+      desc = "linter y formateador de Python",
+      -- Los assets de ruff llevan el triple plataforma en el nombre.
+      asset = "ruff-%s.tar.gz",
+      targets = { ["linux-x86_64"] = "x86_64-unknown-linux-gnu", ["linux-aarch64"] = "aarch64-unknown-linux-gnu", ["darwin-x86_64"] = "x86_64-apple-darwin", ["darwin-aarch64"] = "aarch64-apple-darwin" },
+      url = "https://github.com/astral-sh/ruff/releases/download/%s/",
+      -- Adentro del tarball el binario cuelga de un subdirectorio con el
+      -- nombre del release. Es lo que hace `tar` y nada más.
+      inner = "ruff",
+      bin = "ruff",
+    },
+    stylelint = {
+      kind = "npm",
+      version = "16.26.0",
+      pkg = "stylelint",
+      desc = "linter de CSS",
+    },
+  },
 }

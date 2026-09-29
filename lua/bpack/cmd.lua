@@ -204,6 +204,20 @@ function M.setup()
   vim.api.nvim_create_user_command("Bpack", function(cmd)
     local arg = cmd.args or ""
     local sub, rest = arg:match("^(%S+)%s*(.*)$")
+
+    -- El `!` va siempre pegado al subcomando, como en `:w!` y `:q!`:
+    -- `:Bpack update! telescope`, `:Bpack selfupdate!`. Se separa acá y se le
+    -- pasa al handler como primer caracter de `rest`, para que los tres
+    -- comandos que lo usan lo entiendan igual.
+    --
+    -- Sin esto `:Bpack selfupdate!` no resolvia: `match` se llevaba el `!` como
+    -- parte del nombre, `M.subs["selfupdate!"]` era nil, y el comando rechazaba
+    -- una sintaxis que el help anunciaba.
+    if sub and sub:sub(-1) == "!" then
+      sub = sub:sub(1, -2)
+      rest = rest ~= "" and ("! " .. rest) or "!"
+    end
+
     if not sub or M.subs[sub] == nil then
       require("bpack.util").notify(
         ("'Bpack %s' no existe. Disponibles: %s"):format(

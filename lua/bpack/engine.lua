@@ -484,8 +484,9 @@ end
 --- muestra el changelog. No lo reemplazamos: hace mejor ese trabajo del que
 --- haríamos nosotros.
 function M.cmd_update(args)
-  local bang = args:sub(-1) == "!"
-  local rest = vim.trim(bang and args:sub(1, -2) or args)
+  -- El dispatcher deja el `!` adelante (`update! telescope`), no al final.
+  local bang = args:sub(1, 1) == "!"
+  local rest = vim.trim(bang and args:sub(2) or args)
 
   local names
   if rest ~= "" then

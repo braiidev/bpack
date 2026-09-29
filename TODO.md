@@ -6,7 +6,8 @@ fase en curso, este archivo es el indice de trabajo.
 
 ## Doing
 
-- [ ] Replan: 4 fases, toolchain antes de los lenguajes, IDE completo - v0.10
+- [ ] `install.sh` interactivo: version de Neovim, lista de faltantes, y el
+      intercambio verificado - v0.12
 
 ## Done
 
@@ -19,6 +20,9 @@ fase en curso, este archivo es el indice de trabajo.
 - [x] `spec.lua` + wrapper de `vim.pack` + `:Bpack sync/add/del/update/list/log` - v0.7
 - [x] `doctor.lua` + `:Bpack doctor` - v0.8
 - [x] `scripts/bpack` + `:Bpack selfupdate` con rollback - v0.9
+- [x] Replan: 4 fases, toolchain antes de los lenguajes, IDE completo - v0.10
+- [x] `spec.tools` + `:Bpack install`: prefijo controlado, shims, y el `!` del
+      dispatcher arreglado - v0.11
 
 ## Fase 0 — el gestor se vuelve capaz de sustentar todo
 
@@ -26,7 +30,7 @@ La toolchain va **antes** que los lenguajes: `lua/lang/python.lua` tiene que
 apuntar al ruff que instala bpack, no al que haya en `/usr/bin`. Construir los
 lenguajes primero contra el sistema obliga a reescribirlos todos después.
 
-- [ ] `spec.tools` + `:Bpack install`: prefijo controlado en
+- [x] `spec.tools` + `:Bpack install`: prefijo controlado en
       `~/.local/opt/bpack-tools/` y shims en `~/.local/bin` - v0.11
 - [ ] `install.sh` interactivo: reporta la version de Neovim, lista lo que falta,
       pregunta, y hace `install` + `sync`. Clona al lado y verifica antes de

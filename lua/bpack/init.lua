@@ -26,8 +26,10 @@ M.started = false
 --- porque sólo lee el estado de los anteriores y tiene que poder mencionarlos
 --- aunque alguno haya fallado al cargar; `bpack.selfupdate` cuarto, que además de
 --- registrar su comando necesita el engine para resincronizar; `bpack.theme`
---- quinto para que el highlighting esté listo antes de que monte cualquier UI; y
---- `bpack.keymap` al final, cuando ya no queda nada que registrar.
+--- `bpack.toolchain` registra `:Bpack install`, que sólo lee el spec y no toca
+--- el disco al arrancar; `bpack.theme` va después para que el highlighting esté
+--- listo antes de que monte cualquier UI; y `bpack.keymap` al final, cuando ya no
+--- queda nada que registrar.
 --- @type string[]
 local modules = {
   "core",
@@ -35,6 +37,7 @@ local modules = {
   "bpack.engine",
   "bpack.doctor",
   "bpack.selfupdate",
+  "bpack.toolchain",
   "bpack.theme",
   "bpack.keymap",
 }

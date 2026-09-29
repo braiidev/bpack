@@ -81,12 +81,12 @@ case "${1:-}" in
     ;;
 
   --setup)
-    # La instalación de cero es `install.sh`, que es v0.10. Delegar acá en vez
+    # La instalación de cero es `install.sh`, que es v0.12. Delegar acá en vez
     # de inventar una segunda forma de hacer lo mismo.
     if [ -x "$root/install.sh" ]; then
       exec "$root/install.sh" "$@"
     fi
-    die "todavía no hay install.sh en $root (llega en v0.10); por ahora: bpack --doctor"
+    die "todavía no hay install.sh en $root (llega en v0.12); por ahora: bpack --doctor"
     ;;
 
   --help | -h | "")

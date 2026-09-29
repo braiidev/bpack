@@ -143,7 +143,7 @@ end
 --- `:Bpack selfupdate`
 --- @param args string
 function M.cmd_selfupdate(args)
-  local skip_probe = args:find("!") ~= nil
+  local skip_probe = args:sub(1, 1) == "!"
   util.log("selfupdate: empieza (probe=%s)", tostring(not skip_probe))
 
   -- 1. Condiciones para poder volver atrás sin perder nada.
