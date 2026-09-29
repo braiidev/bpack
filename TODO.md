@@ -6,8 +6,8 @@ fase en curso, este archivo es el indice de trabajo.
 
 ## Doing
 
-- [ ] `tests/` de la config: sandbox con `BPACK_TOOLS_ROOT`, y los casos de
-      install.sh (idempotencia, cancelacion, verificacion que falla) - v0.13
+- [ ] `nvim-lspconfig` por runtimepath, con el `user/repo` del spec arreglado y
+      `__no_start_dir__` fuera del pack dir - v0.14
 
 ## Done
 
@@ -25,6 +25,8 @@ fase en curso, este archivo es el indice de trabajo.
       dispatcher arreglado - v0.11
 - [x] `install.sh` interactivo: preflight, reporte, verificacion previa, y el
       intercambio con backup - v0.12
+- [x] `tests/run.sh`: 11 casos en sandbox, sin red, con el gate de arranque
+      limpio - v0.13
 
 ## Fase 0 — el gestor se vuelve capaz de sustentar todo
 
@@ -34,15 +36,15 @@ lenguajes primero contra el sistema obliga a reescribirlos todos después.
 
 - [x] `spec.tools` + `:Bpack install`: prefijo controlado en
       `~/.local/opt/bpack-tools/` y shims en `~/.local/bin` - v0.11
-- [ ] `install.sh` interactivo: reporta la version de Neovim, lista lo que falta,
-      pregunta, y hace `install` + `sync`. Clona al lado y verifica antes de
-      intercambiar - v0.12
-- [ ] `tests/` de la config + gate de arranque limpio. Los casos de install.sh
-      (idempotencia, cancelacion, verificacion que falla) van aca. Y el doctor
-      reporta `__no_start_dir__` como error siendo un directorio vacio que
-      `vim.pack` ignora: medido, no rompe el arranque. O se corrige la
-      comprobacion o el texto de `AGENTS.md`, que decia que el motor llama
-      `error()` - v0.13
+- [x] `install.sh` interactivo: reporta la version de Neovim, lista lo que falta,
+      pregunta, verifica con `XDG_*` temporales, y recien ahi intercambia con
+      backup - v0.12
+- [x] `tests/run.sh`: 11 casos en sandbox, sin red, con el gate de arranque
+      limpio. Y una correccion al registro: el doctor **no** era un falso
+      positivo. `__no_start_dir__` parece inocuo con el spec vacio porque
+      `vim.pack` no camina el pack dir, pero en cuanto el spec tiene un plugin el
+      sync muere con `pack.lua:251`. El chequeo estaba bien y el texto de
+      `AGENTS.md` era lo que mentia - v0.13
 
 ## Fase intermedia — el set de plugins, instalado por bpack
 
@@ -50,10 +52,16 @@ Primera prueba real del gestor: los plugins entran por el mismo camino que va a
 usar el usuario, no a mano. Los siete del orden de prioridad.
 
 - [ ] `nvim-lspconfig` cargado por runtimepath, **sin** `require("lspconfig")`.
-      Y de paso: el spec no normaliza `user/repo` a URL. Escrito a mano,
+      Y de paso, dos cosas que salen aca por ser la primera task con un plugin
+      real en el spec:
+      (a) borrar `__no_start_dir__` del pack dir ANTES del primer sync. Es lo
+      unico de la config vieja que rompe: `pack.lua:251`, `fatal: not a git
+      repository`. Con el spec vacio no se ve, porque `vim.pack` no camina el pack
+      dir; en cuanto hay un plugin, aparece. Los 22 clones viejos no molestan
+      (medido: `vim.pack` los ignora), asi que pueden quedarse.
+      (b) el spec no normaliza `user/repo` a URL. Escrito a mano,
       `folke/plenary.nvim` falla con `repository does not exist`; `:Bpack add` si
-      lo hace. Es la primera task que mete un plugin, asi que es donde se
-      arregla - v0.14
+      lo hace - v0.14
 - [ ] `nvim-treesitter` + el bloque de parsers de los 7 lenguajes - v0.15
 - [ ] `conform.nvim` - v0.16
 - [ ] `nvim-cmp` + `LuaSnip` + `friendly-snippets` (bloque inseparable) - v0.17
@@ -103,10 +111,21 @@ keymaps se definien al final, cuando bpack funcione entero.
 ## Fase 4 — portabilidad y el swap
 
 - [ ] Prueba en `HOME` temporal, instalacion de cero de verdad - v0.42
-- [ ] `MIGRATION.md` con el procedimiento para las otras maquinas - v0.43
+- [ ] `install.sh` como bootstrap de una linea: `curl -fsSL <url>/install.sh | bash`.
+      Hoy no puede, y son dos razones concretas. Una: el script es bash, no sh
+      (usa `[[ ]]`, `BASH_SOURCE` y arrays), asi que con `sh` no parsea; y el
+      `| sh` que se suele escribir a mano no anda. Dos, la importante: el
+      preflight exige `lua/bpack/init.lua`, o sea estar adentro del repo, y
+      desde un pipe no hay repo. Tiene que clonar a un directorio propio
+      (`~/.local/share/bpack/repo`, fuera del config dir para que el lock no
+      caiga en el arbol) y seguir desde ahi. El flujo de desarrollo, corriendo
+      el script desde un clon local, tiene que seguir funcionando - v0.43
+- [ ] `MIGRATION.md` con el procedimiento para las otras maquinas - v0.44
 - [ ] Swap de `~/.config/nvim` con backup previo, y borrado de lo viejo:
-      `/usr/bin/lua-language-server`, `~/.local/bin/pyright` y los 12 paquetes de
-      `~/.npm-global/lib/node_modules/` - v0.44
+      `/usr/bin/lua-language-server`, `~/.local/bin/pyright`, los 12 paquetes de
+      `~/.npm-global/lib/node_modules/`, y los 22 clones del pack dir que bpack
+      no declare. El pack dir se limpia clone a clone, no entero: es donde bpack
+      instala, y `__no_start_dir__` ya se fue en v0.14 - v0.45
 
 ## Descartado
 

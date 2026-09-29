@@ -211,6 +211,17 @@ local function check_pack_dir()
   -- `__no_start_dir__`, que es un *directorio* sin `.git`. Un chequeo de "sólo
   -- hay directorios" lo deja pasar, y el síntoma es un `fatal: not a git
   -- repository` que sale de `vim.pack` y no dice qué loivoló.
+  --
+  -- Medido, y es la parte que hace que el chequeo parezca exagerado: con el
+  -- spec vacío `vim.pack` no camina el pack dir, así que el intruso no molesta
+  -- y la maquina parece anda. En cuanto el spec tiene un plugin, el mismo sync
+  -- muere con `pack.lua:251`. Por eso esto se reporta como error y no como
+  -- aviso: el dia que se agrega el primer plugin, esto deja de ser teorico.
+  --
+  -- Lo que *no* molesta, y conviene saberlo para no limpiar de mas: un clon
+  -- git que bpack no declara. `vim.pack` lo ignora sin quejarse. Los 22 plugins
+  -- de la config vieja pueden quedarse hasta la limpieza final; el unico que
+  -- hay que sacar antes del primer plugin es el directorio que no es clon.
   local intruders = {}
   for name, kind in vim.fs.dir(dir) do
     local is_plug = kind == "directory"

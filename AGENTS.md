@@ -147,5 +147,17 @@ limpio. Con el stub, el lock queda en el config dir y el repo no se toca.
 ## Regla de oro del gestor
 
 **No se escribe nunca dentro del pack dir** (`stdpath('data')/site/pack/core/opt`).
-Es territorio exclusivo de `vim.pack`, y el motor llama `error()` si encuentra
-ahi algo que no sea un clon valido de git — eso baja Neovim entero.
+Es territorio exclusivo de `vim.pack`. Si encuentra ahi algo que no sea un clon
+valido de git, el sync falla con `fatal: not a git repository`
+(`pack.lua:251`). Como la llamada al motor va dentro de `util.protect`, Neovim
+**arranca igual** y el sync simplemente no pasa: el fallo se ve en el log, no en
+la pantalla.
+
+Lo que hace parecer inocuo a esto es que el pack dir sólo se camina cuando el
+spec tiene plugins. Con el spec vacío `vim.pack` no mira adentro y un directorio
+suelto ahí pasa desapercibido. Y un clon git que bpack no declara **no molesta**:
+medido, `vim.pack` lo ignora sin quejarse. Lo único que rompe es una entrada que
+no es clon — en esta maquina, `__no_start_dir__`, dejado por la config anterior.
+
+Por eso la primera task que mete un plugin tiene que borrar `__no_start_dir__`
+antes del primer sync.
