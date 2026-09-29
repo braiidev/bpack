@@ -114,6 +114,7 @@ tests/run.sh
 | Path | Que es |
 |---|---|
 | `init.lua` | 3 lineas |
+| `install.sh` | instalador de cero: preflight, reporte, pregunta, verifica, y recién ahi intercambia |
 | `lua/bpack/` | el gestor: spec, engine, cmd, keys, theme, doctor, selfupdate, toolchain, state |
 | `lua/core/` | opciones y autocmds base, sin plugins |
 | `lua/lang/` | matriz IDE, un archivo por lenguaje |
@@ -121,6 +122,27 @@ tests/run.sh
 | `colors/` | `flatline` |
 | `scripts/` | CLI `bpack` |
 | `tests/` | tests de la config |
+
+## Como se instala
+
+`install.sh` (o `scripts/bpack --setup`, que delega en él) hace 8 pasos, y el
+orden es el punto: **verifica antes de intercambiar**. Corre la config nueva con
+`XDG_*` temporales, mira el log de arranque, y sólo si está limpia mueve la config
+actual a `~/.config/nvim.bak.<timestamp>`. El instalador viejo hacía `mv` y
+después `clone`, y entre los dos pasos no había config en su lugar.
+
+No mira el exit code de Neovim para decidir si la config anda, por la misma
+razón que el doctor: `util.protect` deja el arranque en 0 aunque un módulo esté
+roto. Busca `ERROR en` en el log.
+
+Es idempotente: si el stub ya está y apunta al mismo repo, no mueve nada.
+
+**El montaje es un stub, no un symlink.** `~/.config/nvim/init.lua` son tres
+líneas que hacen `dofile` de `init.lua` del repo. La razón está medida:
+`vim.pack` escribe el lock en `stdpath('config')`, o sea adentro de
+`~/.config/nvim`. Si ese directorio fuera el repo, el lock aterrizaría en el
+árbol de git, que quedaría sucio, y `:Bpack selfupdate` aborta por exigir árbol
+limpio. Con el stub, el lock queda en el config dir y el repo no se toca.
 
 ## Regla de oro del gestor
 

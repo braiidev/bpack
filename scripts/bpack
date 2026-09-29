@@ -81,12 +81,14 @@ case "${1:-}" in
     ;;
 
   --setup)
-    # La instalación de cero es `install.sh`, que es v0.12. Delegar acá en vez
-    # de inventar una segunda forma de hacer lo mismo.
+    # La instalación de cero es `install.sh`. Delegar acá en vez de inventar una
+    # segunda forma de hacer lo mismo. El `if` sigue porque un checkout parcial
+    # (o un clon sin el bit de ejecución) tiene que fallar con un mensaje, no
+    # con un "permission denied" de shell.
     if [ -x "$root/install.sh" ]; then
       exec "$root/install.sh" "$@"
     fi
-    die "todavía no hay install.sh en $root (llega en v0.12); por ahora: bpack --doctor"
+    die "install.sh no está en $root o no es ejecutable (chmod +x install.sh)"
     ;;
 
   --help | -h | "")

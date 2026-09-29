@@ -41,7 +41,15 @@ local uv = vim.uv or vim.loop
 --- antes de confiar en el comando.
 --- @return string
 function M.root()
-  return vim.env.BPACK_TOOLS_ROOT or vim.fn.expand("~")
+  -- La cadena vacía se trata como "no definido": en Lua `""` es truthy, así que
+  -- `vim.env.BPACK_TOOLS_ROOT or ~` con la variable vacía daría `""` y el
+  -- prefijo terminaría siendo `/.local/opt/bpack-tools`, en la raíz del
+  -- sistema. Un `BPACK_TOOLS_ROOT=` en un script es suficiente para provocarlo.
+  local r = vim.env.BPACK_TOOLS_ROOT
+  if r == nil or r == "" then
+    return vim.fn.expand("~")
+  end
+  return r
 end
 
 --- Dónde viven los binarios. No se puede cambiar: `lua/lang/` lo lee.

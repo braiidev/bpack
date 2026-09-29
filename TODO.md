@@ -6,8 +6,8 @@ fase en curso, este archivo es el indice de trabajo.
 
 ## Doing
 
-- [ ] `install.sh` interactivo: version de Neovim, lista de faltantes, y el
-      intercambio verificado - v0.12
+- [ ] `tests/` de la config: sandbox con `BPACK_TOOLS_ROOT`, y los casos de
+      install.sh (idempotencia, cancelacion, verificacion que falla) - v0.13
 
 ## Done
 
@@ -23,6 +23,8 @@ fase en curso, este archivo es el indice de trabajo.
 - [x] Replan: 4 fases, toolchain antes de los lenguajes, IDE completo - v0.10
 - [x] `spec.tools` + `:Bpack install`: prefijo controlado, shims, y el `!` del
       dispatcher arreglado - v0.11
+- [x] `install.sh` interactivo: preflight, reporte, verificacion previa, y el
+      intercambio con backup - v0.12
 
 ## Fase 0 — el gestor se vuelve capaz de sustentar todo
 
@@ -35,14 +37,23 @@ lenguajes primero contra el sistema obliga a reescribirlos todos después.
 - [ ] `install.sh` interactivo: reporta la version de Neovim, lista lo que falta,
       pregunta, y hace `install` + `sync`. Clona al lado y verifica antes de
       intercambiar - v0.12
-- [ ] `tests/` de la config + gate de arranque limpio - v0.13
+- [ ] `tests/` de la config + gate de arranque limpio. Los casos de install.sh
+      (idempotencia, cancelacion, verificacion que falla) van aca. Y el doctor
+      reporta `__no_start_dir__` como error siendo un directorio vacio que
+      `vim.pack` ignora: medido, no rompe el arranque. O se corrige la
+      comprobacion o el texto de `AGENTS.md`, que decia que el motor llama
+      `error()` - v0.13
 
 ## Fase intermedia — el set de plugins, instalado por bpack
 
 Primera prueba real del gestor: los plugins entran por el mismo camino que va a
 usar el usuario, no a mano. Los siete del orden de prioridad.
 
-- [ ] `nvim-lspconfig` cargado por runtimepath, **sin** `require("lspconfig")` - v0.14
+- [ ] `nvim-lspconfig` cargado por runtimepath, **sin** `require("lspconfig")`.
+      Y de paso: el spec no normaliza `user/repo` a URL. Escrito a mano,
+      `folke/plenary.nvim` falla con `repository does not exist`; `:Bpack add` si
+      lo hace. Es la primera task que mete un plugin, asi que es donde se
+      arregla - v0.14
 - [ ] `nvim-treesitter` + el bloque de parsers de los 7 lenguajes - v0.15
 - [ ] `conform.nvim` - v0.16
 - [ ] `nvim-cmp` + `LuaSnip` + `friendly-snippets` (bloque inseparable) - v0.17
