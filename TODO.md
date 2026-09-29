@@ -6,7 +6,7 @@ fase en curso, este archivo es el indice de trabajo.
 
 ## Doing
 
-- (vacio — esperando task)
+- [ ] Replan: 4 fases, toolchain antes de los lenguajes, IDE completo - v0.10
 
 ## Done
 
@@ -20,43 +20,78 @@ fase en curso, este archivo es el indice de trabajo.
 - [x] `doctor.lua` + `:Bpack doctor` - v0.8
 - [x] `scripts/bpack` + `:Bpack selfupdate` con rollback - v0.9
 
-## Next — Fase 0: cimientos de `bpack`
+## Fase 0 — el gestor se vuelve capaz de sustentar todo
 
-- [ ] `install.sh` idempotente - v0.10
-- [ ] `tests/` de la config + gate de arranque limpio - v0.11
+La toolchain va **antes** que los lenguajes: `lua/lang/python.lua` tiene que
+apuntar al ruff que instala bpack, no al que haya en `/usr/bin`. Construir los
+lenguajes primero contra el sistema obliga a reescribirlos todos después.
 
-## Next — Fase 1: matriz de lenguajes
+- [ ] `spec.tools` + `:Bpack install`: prefijo controlado en
+      `~/.local/opt/bpack-tools/` y shims en `~/.local/bin` - v0.11
+- [ ] `install.sh` interactivo: reporta la version de Neovim, lista lo que falta,
+      pregunta, y hace `install` + `sync`. Clona al lado y verifica antes de
+      intercambiar - v0.12
+- [ ] `tests/` de la config + gate de arranque limpio - v0.13
 
-- [ ] Esqueleto de `lua/lang/` con el registro declarativo y el dispatch por
-      filetype - v0.12
-- [ ] `python.lua`: pyright + ruff + pytest + debugpy - v0.13
-- [ ] `typescript.lua` + `javascript.lua`: ts_ls + prettier + eslint_d + vitest - v0.14
-- [ ] `html.lua` + `css.lua`: html/cssls + emmet + prettier - v0.15
-- [ ] `bash.lua`: bashls + shfmt + shellcheck + bats - v0.16
-- [ ] `markdown.lua`: marksman + prettier + markdownlint - v0.17
-- [ ] De apoyo: `lua.lua`, `json.lua`, `yaml.lua` - v0.18
+## Fase intermedia — el set de plugins, instalado por bpack
 
-## Next — Fase 2: IDE
+Primera prueba real del gestor: los plugins entran por el mismo camino que va a
+usar el usuario, no a mano. Los siete del orden de prioridad.
 
-- [ ] `cmp` + luasnip con la fuente propia de LSP - v0.19
-- [ ] `conform` por lenguaje + `ruff` reemplaza `black` - v0.20
-- [ ] treesitter sin `ensure_installed` (install por lock) - v0.21
-- [ ] 13 keymaps LSP + `[d` / `]d` + `gr` - v0.22
-- [ ] Opciones base: `completeopt`, `inccommand=split`, `hidden`, `scrolloff` - v0.23
+- [ ] `nvim-lspconfig` cargado por runtimepath, **sin** `require("lspconfig")` - v0.14
+- [ ] `nvim-treesitter` + el bloque de parsers de los 7 lenguajes - v0.15
+- [ ] `conform.nvim` - v0.16
+- [ ] `nvim-cmp` + `LuaSnip` + `friendly-snippets` (bloque inseparable) - v0.17
+- [ ] `telescope.nvim` + `plenary.nvim` - v0.18
+- [ ] `lualine.nvim` + `nvim-web-devicons`, con statusline condicional - v0.19
+- [ ] El set entero: sync limpio, doctor verde, sin huerfanos - v0.20
 
-## Next — Fase 3: git, terminal, tests, debug
+## Fase 1 — matriz de lenguajes
 
-- [ ] `gitsigns` + `fugitive` - v0.24
-- [ ] Terminal: conserva `<leader>t*` de la config vieja, con `%` expandido - v0.25
-- [ ] `:Bpack test` con dispatch por filetype - v0.26
-- [ ] DAP con adapters por lenguaje - v0.27
-- [ ] `scripts/toolchain.sh`: binarios en `~/.local/opt/bpack-tools/` - v0.28
+Un commit por idioma, cada uno con lsp + treesitter + conform + capabilities.
+Los 7 servidores ya estan instalados en el sistema; en esta fase pasan a
+apuntar a los que instala bpack.
 
-## Next — Fase 4: portabilidad
+- [ ] Esqueleto de `lua/lang/` con registro declarativo y dispatch por filetype - v0.21
+- [ ] `lua.lua` - v0.22
+- [ ] `python.lua`: pyright + ruff - v0.23
+- [ ] `javascript.lua` + `typescript.lua`: ts_ls + prettier + eslint - v0.24
+- [ ] `html.lua` + `css.lua`: html + cssls + emmet + stylelint - v0.25
+- [ ] `markdown.lua`: markdownls + prettier - v0.26
+- [ ] `bash.lua`: bashls + shfmt + shellcheck - v0.27
+- [ ] De apoyo: `json.lua` + `yaml.lua` - v0.28
 
-- [ ] Prueba en `HOME` temporal, instalacion de cero - v0.29
-- [ ] `MIGRATION.md` con el procedimiento de las otras maquinas - v0.30
-- [ ] Reemplazo de `~/.config/nvim`, con backup previo - v0.31
+## Fase 2 — IDE: las cualidades que faltaban
+
+De las 15 de un IDE, el plan viejo cubria 9. Estas son las 6 que faltaban. Los
+keymaps se definien al final, cuando bpack funcione entero.
+
+- [ ] Simbolos del workspace + call hierarchy + type definition - v0.29
+- [ ] Code actions con picker (las de LSP, no las de Neovim) - v0.30
+- [ ] Organize imports por lenguaje - v0.31
+- [ ] Textobjects de treesitter - v0.32
+- [ ] Diagnostics de workspace: `pyright --project`, `tsc --noEmit`, con los
+      resultados metidos en el buffer - v0.33
+- [ ] Extract e inline (refactor mecanico) - v0.34
+- [ ] Comportamientos: keymaps LSP, la regla de contexto statusline/dashboard,
+      y el reparto de atajos - v0.35
+
+## Fase 3 — extensiones
+
+- [ ] `gitsigns.nvim` + `fugitive` (no esta en disco, hay que bajarlo) - v0.36
+- [ ] `nvim-tree.lua` con render de estado de git - v0.37
+- [ ] `alpha-nvim` como dashboard, solo al abrir sin ruta - v0.38
+- [ ] Terminal, conservando `<leader>t*` de la config vieja - v0.39
+- [ ] `:Bpack test` con dispatch por filetype - v0.40
+- [ ] DAP con adapters por lenguaje - v0.41
+
+## Fase 4 — portabilidad y el swap
+
+- [ ] Prueba en `HOME` temporal, instalacion de cero de verdad - v0.42
+- [ ] `MIGRATION.md` con el procedimiento para las otras maquinas - v0.43
+- [ ] Swap de `~/.config/nvim` con backup previo, y borrado de lo viejo:
+      `/usr/bin/lua-language-server`, `~/.local/bin/pyright` y los 12 paquetes de
+      `~/.npm-global/lib/node_modules/` - v0.44
 
 ## Descartado
 
@@ -70,3 +105,10 @@ fase en curso, este archivo es el indice de trabajo.
   lockfile si se commitea.
 - **Sentinel `start_path` en el pack dir**: fue el exacto motivo por el que la
   config vieja no arranca. Ver `PLAN.md`, decision 3.
+- **Que `install.sh` edite el `.zshrc`**: sumar `~/.local/opt/bpack-tools/bin` al
+  PATH obliga a tocar la shell del usuario. Los shims en `~/.local/bin`, que ya
+  esta en el PATH, resuelven lo mismo sin invadir nada.
+- **Borrar `~/.config/nvim` en la instalacion**: se mueve a un backup con
+  timestamp. Ademas el instalador viejo dejaba una ventana sin config entre el
+  `mv` y el `git clone`; el nuevo clona al lado, verifica que arranque, y recien
+  ahi intercambia. Si algo falla antes, no se toco nada.
