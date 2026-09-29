@@ -32,15 +32,14 @@ end
 
 --- El pack dir. Nunca hardcodeado.
 ---
---- Sale del path que devuelve `vim.pack` para un plugin ya instalado. Si no hay
---- ninguno todavía, cae al default documentado — que es el mismo que usa
---- `vim.pack`, y sólo se usa para mostrar, nunca para escribir.
+--- Sale del mismo cálculo que hace `vim.pack` en `get_plug_dir()`, que es una
+--- función plana a `stdpath('data')/site/pack/core/opt`. No se lo pregunta a
+--- `vim.pack.get` a propósito: `get` dispara `lock_read`, que abre un buffer de
+--- confirmación cuando el lock y el disco no coinciden. Con esta ruta
+--- aritmética, `:Bpack list` no puede abrir una ventana de decisión ni tocar
+--- nada, que es lo que se le pidió.
 --- @return string
 function M.pack_dir()
-  local ok, plugs = pcall(vim.pack.get, nil, { info = false })
-  if ok and plugs and plugs[1] and plugs[1].path then
-    return vim.fs.dirname(plugs[1].path)
-  end
   return vim.fs.joinpath(vim.fn.stdpath("data"), "site", "pack", "core", "opt")
 end
 
