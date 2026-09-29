@@ -21,11 +21,12 @@ M.started = false
 --- justamente lo que hizo confuso al manager anterior.
 ---
 --- El orden importa. `bpack.cmd` se carga primero porque publica el registro de
---- subcomandos y el scratch que usan los demás; `bpack.theme` va segundo para
---- que el highlighting esté listo antes de que monte cualquier UI; y
+--- subcomandos y el scratch que usan los demás; `bpack.engine` segundo, que
+--- registra plugins y emite `User VeryLazy` en `VimEnter`; `bpack.theme` tercero
+--- para que el highlighting esté listo antes de que monte cualquier UI; y
 --- `bpack.keymap` al final, cuando ya no queda nada que registrar.
 --- @type string[]
-local modules = { "core", "bpack.cmd", "bpack.theme", "bpack.keymap" }
+local modules = { "core", "bpack.cmd", "bpack.engine", "bpack.theme", "bpack.keymap" }
 
 --- Carga los módulos en orden. Cada uno dentro de `util.protect`, así que un
 --- error en uno no impide que carguen los siguientes.

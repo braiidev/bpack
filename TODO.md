@@ -6,7 +6,7 @@ fase en curso, este archivo es el indice de trabajo.
 
 ## Doing
 
-- [x] `theme.lua` + port de `flatline` + persistencia en `state.json` - v0.6
+- (vacio — esperando task)
 
 ## Done
 
@@ -15,14 +15,11 @@ fase en curso, este archivo es el indice de trabajo.
 - [x] `init.lua` + `bpack/init.lua`: guarda de 0.12, `pcall` sobre todo - v0.3
 - [x] `core/`: options y autocmds base, sin plugins - v0.4
 - [x] `keys.lua` + `keymap.lua` + `:Bpack keys` autogenerado - v0.5
+- [x] `theme.lua` + port de `flatline` + persistencia en `state.json` - v0.6
+- [x] `spec.lua` + wrapper de `vim.pack` + `:Bpack sync/add/del/update/list/log` - v0.7
 
 ## Next — Fase 0: cimientos de `bpack`
 
-- [x] `init.lua` + `bpack/init.lua`: guarda de 0.12, `pcall` sobre todo - v0.3
-- [x] `core/`: options y autocmds base, sin plugins - v0.4
-- [x] `keys.lua` + `keymap.lua` + `:Bpack keys` autogenerado - v0.5
-- [x] `theme.lua` + port de `flatline` + persistencia en `state.json` - v0.6
-- [ ] `spec.lua` + wrapper de `vim.pack` + `:Bpack sync/add/del/update/list/log` - v0.7
 - [ ] `doctor.lua` + `:Bpack doctor` - v0.8
 - [ ] `scripts/bpack` + `:Bpack selfupdate` con rollback - v0.9
 - [ ] `install.sh` idempotente - v0.10

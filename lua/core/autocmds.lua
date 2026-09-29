@@ -4,6 +4,7 @@
 -- idempotente: recargar dos veces no duplica autocmds.
 
 local options = require("core.options")
+local util = require("bpack.util")
 
 local M = {}
 
@@ -123,6 +124,23 @@ function M.setup()
       if vim.o.equalalways then
         vim.cmd("wincmd =")
       end
+    end,
+  })
+
+  -- Emite `User VeryLazy` una vez, al terminar el arranque.
+  --
+  -- Sin esto, todo lo que se registra para carga diferida queda esperando un
+  -- evento que nunca llega, y el síntoma es "el atajo no hace nada" semanas
+  -- después. La config vieja tenía exactamente este hueco.
+  au("VimEnter", {
+    group = group,
+    desc = "bpack: dispara User VeryLazy",
+    callback = function()
+      vim.api.nvim_exec_autocmds("User", {
+        pattern = require("bpack.engine").lazy_event,
+        modeline = false,
+      })
+      util.log("User VeryLazy emitido")
     end,
   })
 
