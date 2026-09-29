@@ -58,9 +58,10 @@ return {
     { "n", "<leader><leader>s-", "<C-w>s", "Split horizontal (abajo)", "splits" },
     { "n", "<leader><leader>sq", "<C-w>q", "Cerrar la ventana", "splits" },
     { "n", "<leader><leader>so", "<C-w>o", "Cerrar las otras ventanas", "splits" },
-    { "n", "<leader><leader>se", "<C-w>=", "Igualar alto de las ventanas", "splits" },
-    { "n", "<leader><leader>s<", "<C-w><", "Ancho máximo", "splits" },
-    { "n", "<leader><leader>s>", "<C-w>>", "Ancho mínimo", "splits" },
+    { "n", "<leader><leader>se", "<C-w>=", "Igualar el tamaño de las ventanas", "splits" },
+    -- Ojo con la dirección: `<` achica y `>` agranda el ancho.
+    { "n", "<leader><leader>s<", "<C-w><", "Reducir el ancho", "splits" },
+    { "n", "<leader><leader>s>", "<C-w>>", "Aumentar el ancho", "splits" },
 
     -- ── Tabs ──────────────────────────────────────────────────────────
     { "n", "<leader><leader>tn", "<cmd>tabnew<cr>", "Tab nueva", "tabs" },
@@ -68,7 +69,21 @@ return {
     { "n", "<leader><leader>tl", "<cmd>tabnext<cr>", "Tab siguiente", "tabs" },
     { "n", "<leader><leader>tc", "<cmd>tabclose<cr>", "Cerrar tab", "tabs" },
     { "n", "<leader><leader>to", "<cmd>tabonly<cr>", "Cerrar las otras tabs", "tabs" },
-    { "n", "<leader><leader>tg", "<cmd>tabgoto<cr>", "Ir a la tab N", "tabs" },
+    {
+      "n",
+      "<leader><leader>tg",
+      function()
+        -- No hay `:tabgoto`; se pregunta el número y se salta con `:tabnext`.
+        vim.ui.input({ prompt = ("Tab (1-%d): "):format(vim.fn.tabpagenr("$")) }, function(input)
+          local n = tonumber(input)
+          if n and n >= 1 and n <= vim.fn.tabpagenr("$") then
+            vim.cmd.tabnext(n)
+          end
+        end)
+      end,
+      "Ir a la tab N",
+      "tabs",
+    },
 
     -- ── Buffers ───────────────────────────────────────────────────────
     { "n", "<leader><leader>bn", "<cmd>bnext<cr>", "Buffer siguiente", "buffers" },
@@ -91,20 +106,25 @@ return {
     { "n", "<leader><leader>bl", "<cmd>buffers<cr>", "Lista de buffers", "buffers" },
 
     -- ── Editar ────────────────────────────────────────────────────────
-    -- `jj` en vez de `j`→`gjzz`: el recentrado va por `scrolloff`, no
-    -- embebido en el movimiento. Así `.` repite lo que hiciste y no un `zz`
-    -- que nadie pidió.
+    -- El recentrado lo hace `scrolloff`, no un `zz` embebido en el movimiento:
+    -- así `.` repite lo que hiciste y no un `zz` que nadie pidió.
     { "n", "<A-j>", "<cmd>move .+1<cr>==", "Bajar la línea", "editar" },
     { "n", "<A-k>", "<cmd>move .-2<cr>==", "Subir la línea", "editar" },
     { "v", "<A-j>", ":move '>+1<cr>gv=gv", "Bajar el bloque", "editar" },
     { "v", "<A-k>", ":move '<-2<cr>gv=gv", "Subir el bloque", "editar" },
 
-    -- `<C-d>`/`gn` deja de ser scroll de media página y pasa a buscar la
-    -- próxima ocurrencia y selectionarla, como en VSCode.
+    -- `<C-d>` deja de ser scroll de media página y pasa a buscar la próxima
+    -- ocurrencia y seleccionarla, como en VSCode.
     { "n", "<C-d>", "*gn", "Buscar y seleccionar la siguiente", "editar" },
     { "v", "<C-d>", "y*gn", "Buscar y agregar la siguiente", "editar" },
 
     { "n", "<Esc>", "<cmd>nohlsearch<cr>", "Limpiar la búsqueda", "editar" },
     { "v", "<Esc>", "<cmd>nohlsearch<cr><esc>", "Limpiar la búsqueda y salir de visual", "editar" },
+
+    -- ── Colores ───────────────────────────────────────────────────────
+    -- El tema es preferencia de la máquina, no del repo: se guarda en
+    -- `state.json` y sobrevive al cierre.
+    { "n", "<leader><leader>ct", "<cmd>Bpack theme<cr>", "Cambiar de tema", "colores" },
+    { "n", "<leader><leader>cl", "<cmd>Bpack theme list<cr>", "Listar los temas", "colores" },
   },
 }

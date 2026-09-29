@@ -20,10 +20,12 @@ M.started = false
 --- `lua/bpack/` y las features bajo `lua/`, y adivinar cuál es cuál fue
 --- justamente lo que hizo confuso al manager anterior.
 ---
---- El orden importa: `bpack.keymap` fija el leader antes de registrar ningún
---- atajo, y `bpack.cmd` publica los comandos una vez que todo lo demás cargó.
+--- El orden importa. `bpack.cmd` se carga primero porque publica el registro de
+--- subcomandos y el scratch que usan los demás; `bpack.theme` va segundo para
+--- que el highlighting esté listo antes de que monte cualquier UI; y
+--- `bpack.keymap` al final, cuando ya no queda nada que registrar.
 --- @type string[]
-local modules = { "core", "bpack.keymap", "bpack.cmd" }
+local modules = { "core", "bpack.cmd", "bpack.theme", "bpack.keymap" }
 
 --- Carga los módulos en orden. Cada uno dentro de `util.protect`, así que un
 --- error en uno no impide que carguen los siguientes.

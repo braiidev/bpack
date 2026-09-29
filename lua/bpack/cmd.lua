@@ -5,12 +5,27 @@
 
 local M = {}
 
+--- Subcomandos disponibles. Es un registro, no una lista fija: cada módulo
+--- publica el suyo desde su `setup()` con `M.register`. Así agregar un
+--- subcomando es agregar un archivo, no editar este.
+--- @type table<string, fun(args: string)>
+M.subs = {}
+
+--- Descripción de cada subcomando, para el autocompletado.
+--- @type table<string, string>
+M.descriptions = {}
+
 --- Abre un buffer scratch con líneas. Base de `:Bpack keys` y de lo que venga.
+---
+--- `opts.maps` son atajos buffer-locales: `{ ["<CR>"] = fun() end }`. Los usa
+--- el selector de temas para que se pueda elegir con un número.
 --- @param title string
 --- @param lines string[]
 --- @param ft string
+--- @param opts? { maps?: table<string, string|fun()>, winopts?: table }
 --- @return integer bufnr
-function M.scratch(title, lines, ft)
+function M.scratch(title, lines, ft, opts)
+  opts = opts or {}
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_name(buf, "bpack://" .. title)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
@@ -22,7 +37,7 @@ function M.scratch(title, lines, ft)
 
   local width = math.min(96, vim.o.columns - 6)
   local height = math.min(#lines + 1, vim.o.lines - 4)
-  local win = vim.api.nvim_open_win(buf, true, {
+  local win = vim.api.nvim_open_win(buf, true, vim.tbl_extend("force", {
     relative = "editor",
     width = width,
     height = height,
@@ -32,11 +47,15 @@ function M.scratch(title, lines, ft)
     border = "rounded",
     title = " bpack · " .. title .. " ",
     title_pos = "center",
-  })
+  }, opts.winopts or {}))
+
   vim.wo[win].wrap = false
   vim.wo[win].conceallevel = 2
   vim.wo[win].concealcursor = "nvic"
   vim.keymap.set("n", "q", "<cmd>close<scr>", { buffer = buf, nowait = true, silent = true })
+  for lhs, rhs in pairs(opts.maps or {}) do
+    vim.keymap.set("n", lhs, rhs, { buffer = buf, nowait = true, silent = true })
+  end
   return buf
 end
 
@@ -116,7 +135,12 @@ function M.keys(args)
   if pattern then
     local filtered = {}
     for _, r in ipairs(rows) do
-      if r.lhs:lower():find(pattern:lower(), 1, true) or r.desc:lower():find(pattern:lower(), 1, true) then
+      -- Se busca también en el grupo: `:Bpack keys colores` es más natural que
+      -- acordarse del nombre de un atajo.
+      if r.lhs:lower():find(pattern:lower(), 1, true)
+        or r.desc:lower():find(pattern:lower(), 1, true)
+        or r.group:lower():find(pattern:lower(), 1, true)
+      then
         filtered[#filtered + 1] = r
       end
     end
@@ -156,34 +180,56 @@ function M.keys(args)
   M.scratch("keys", lines, "bpack-keys")
 end
 
---- Subcomandos disponibles. Cada uno es `fun(args: string)`.
---- @type table<string, fun(args: string)>
-M.subs = {
-  keys = M.keys,
-}
+--- Publica un subcomando. Lo llaman las features en su `setup()`.
+--- @param name string
+--- @param fn fun(args: string)
+--- @param desc string para el autocompletado
+function M.register(name, fn, desc)
+  M.subs[name] = fn
+  M.descriptions[name] = desc
+  return fn
+end
+
+--- La lista de subcomandos con su descripción, para el mensaje de error.
+--- @return string[]
+local function subcommand_list()
+  local names = vim.tbl_keys(M.subs)
+  table.sort(names)
+  return vim.tbl_map(function(name)
+    return M.descriptions[name] and (name .. " — " .. M.descriptions[name]) or name
+  end, names)
+end
 
 function M.setup()
   vim.api.nvim_create_user_command("Bpack", function(cmd)
     local arg = cmd.args or ""
     local sub, rest = arg:match("^(%S+)%s*(.*)$")
     if not sub or M.subs[sub] == nil then
-      local names = vim.tbl_keys(M.subs)
-      table.sort(names)
       require("bpack.util").notify(
-        ("'Bpack %s' no existe. Disponibles: %s"):format(tostring(sub), table.concat(names, ", "))
+        ("'Bpack %s' no existe. Disponibles: %s"):format(
+          tostring(sub),
+          table.concat(subcommand_list(), "  ·  ")
+        )
       )
       return
     end
     M.subs[sub](rest)
   end, {
     nargs = "*",
+    -- `force` para que volver a llamar a `setup()` no reviente: reload y
+    -- self-update rehacen el arranque sobre el Neovim que ya está corriendo.
+    force = true,
     desc = "Gestor de plugins, atajos y temas de bpack",
     complete = function(lead)
+      local names = vim.tbl_keys(M.subs)
+      table.sort(names)
       return vim.tbl_filter(function(name)
         return name:find(lead, 1, true) == 1
-      end, vim.tbl_keys(M.subs))
+      end, names)
     end,
   })
+
+  M.register("keys", M.keys, "Atajos, agrupados")
 
   return true
 end

@@ -6,7 +6,7 @@ fase en curso, este archivo es el indice de trabajo.
 
 ## Doing
 
-- (vacio — esperando task)
+- [ ] `theme.lua` + port de `flatline` + persistencia en `state.json` - v0.6
 
 ## Done
 
